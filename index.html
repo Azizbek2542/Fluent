@@ -1,0 +1,1344 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>FLUENT — Английский с AI-наставником</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════════
+   DESIGN SYSTEM
+   Palette: Deep Ink #0A0A0F · Ivory #F7F4EE · Jade #00B894 · Amber #F0A500 · Rose #E84393 · Lavender #7C5CBF
+   Display: DM Serif Display (editorial gravitas)
+   Body: DM Sans (clean, warm, modern)
+   Signature: Full-screen AI conversation panel that pulses like a live call
+═══════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#0A0A0F;
+  --ink2:#14141C;
+  --surface:#111119;
+  --card:#18181F;
+  --border:#242430;
+  --jade:#00B894;
+  --jade-dim:rgba(0,184,148,.15);
+  --amber:#F0A500;
+  --amber-dim:rgba(240,165,0,.12);
+  --rose:#E84393;
+  --lav:#7C5CBF;
+  --lav-dim:rgba(124,92,191,.15);
+  --ivory:#F7F4EE;
+  --muted:#6B6B80;
+  --dim:#2A2A38;
+  --r:12px;
+  --r-lg:20px;
+  --serif:'DM Serif Display',serif;
+  --sans:'DM Sans',sans-serif;
+  --ease:cubic-bezier(.4,0,.2,1);
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:var(--sans);background:var(--ink);color:var(--ivory);overflow-x:hidden;line-height:1.65}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--ink)}
+::-webkit-scrollbar-thumb{background:var(--dim);border-radius:3px}
+::selection{background:var(--jade);color:var(--ink)}
+
+/* ── UTILITIES ── */
+.serif{font-family:var(--serif)}
+.jade{color:var(--jade)}
+.amber{color:var(--amber)}
+.rose{color:var(--rose)}
+.muted{color:var(--muted)}
+.hidden{display:none!important}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:500;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:16px 5vw;
+  background:rgba(10,10,15,.85);
+  backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);
+  transition:all .3s var(--ease);
+}
+.logo{font-family:var(--serif);font-size:24px;color:var(--ivory);text-decoration:none;letter-spacing:-.5px}
+.logo sup{font-family:var(--sans);font-size:10px;font-weight:600;color:var(--jade);vertical-align:super;letter-spacing:.1em}
+.nav-links{display:flex;gap:28px;list-style:none;align-items:center}
+.nav-links a{font-size:14px;font-weight:400;color:var(--muted);text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:var(--ivory)}
+.nav-btn{background:var(--jade);color:var(--ink)!important;padding:9px 22px;border-radius:100px;font-weight:600!important;font-size:14px!important;transition:opacity .2s!important}
+.nav-btn:hover{opacity:.85}
+.nav-toggle{display:none;background:none;border:none;color:var(--ivory);font-size:22px;cursor:pointer}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:0;
+  padding-top:73px;
+  position:relative;
+  overflow:hidden;
+}
+.hero-left{
+  display:flex;flex-direction:column;justify-content:center;
+  padding:80px 5vw 80px 5vw;
+  position:relative;z-index:1;
+}
+.hero-right{
+  background:var(--surface);
+  border-left:1px solid var(--border);
+  display:flex;flex-direction:column;
+  position:relative;
+  overflow:hidden;
+}
+/* ambient glow */
+.hero-left::before{
+  content:'';position:absolute;
+  width:600px;height:600px;
+  background:radial-gradient(circle,rgba(0,184,148,.12),transparent 65%);
+  top:-100px;left:-200px;pointer-events:none;
+}
+
+.hero-pill{
+  display:inline-flex;align-items:center;gap:8px;
+  background:var(--jade-dim);border:1px solid rgba(0,184,148,.3);
+  color:var(--jade);font-size:12px;font-weight:600;
+  padding:7px 16px;border-radius:100px;
+  margin-bottom:36px;letter-spacing:.04em;
+  width:fit-content;
+}
+.live-dot{width:7px;height:7px;background:var(--jade);border-radius:50%;animation:ldot 2s ease-in-out infinite}
+@keyframes ldot{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(.5);opacity:.4}}
+
+.hero h1{
+  font-family:var(--serif);
+  font-size:clamp(42px,5.5vw,74px);
+  line-height:1.05;
+  letter-spacing:-.02em;
+  color:var(--ivory);
+  margin-bottom:28px;
+}
+.hero h1 i{font-style:italic;color:var(--jade)}
+.hero-sub{font-size:18px;font-weight:300;color:var(--muted);line-height:1.8;margin-bottom:44px;max-width:440px}
+.hero-actions{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:15px 30px;border-radius:100px;font-size:15px;font-weight:500;text-decoration:none;cursor:pointer;border:none;font-family:var(--sans);transition:all .2s var(--ease)}
+.btn-jade{background:var(--jade);color:var(--ink);font-weight:600}
+.btn-jade:hover{background:#00d4aa;transform:translateY(-2px);box-shadow:0 12px 32px rgba(0,184,148,.3)}
+.btn-ghost{background:transparent;border:1.5px solid var(--border);color:var(--ivory)}
+.btn-ghost:hover{border-color:var(--jade);color:var(--jade)}
+.btn-sm{padding:10px 22px;font-size:14px}
+
+.hero-numbers{display:flex;gap:36px;margin-top:60px;padding-top:40px;border-top:1px solid var(--border);flex-wrap:wrap}
+.hn-val{font-family:var(--serif);font-size:34px;color:var(--ivory);letter-spacing:-.02em}
+.hn-val span{color:var(--jade)}
+.hn-label{font-size:12px;color:var(--muted);margin-top:3px;font-weight:400}
+
+/* ── AI CHAT PANEL (hero right) ── */
+.chat-panel{display:flex;flex-direction:column;max-height:calc(100vh - 73px)}
+.chat-header{
+  padding:20px 24px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;flex-shrink:0;
+}
+.ai-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--jade),var(--lav));display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+.chat-ai-name{font-size:14px;font-weight:600;color:var(--ivory)}
+.chat-ai-status{font-size:12px;color:var(--jade);display:flex;align-items:center;gap:5px}
+.chat-ai-status::before{content:'';width:6px;height:6px;background:var(--jade);border-radius:50%;animation:ldot 2s ease-in-out infinite}
+.chat-messages{flex:1;overflow-y:auto;padding:20px 24px;display:flex;flex-direction:column;gap:14px;min-height:0}
+.msg{max-width:85%;animation:msg-in .3s var(--ease)}
+@keyframes msg-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.msg-ai{align-self:flex-start}
+.msg-user{align-self:flex-end}
+.msg-bubble{padding:12px 16px;border-radius:16px;font-size:14px;line-height:1.6;font-weight:400}
+.msg-ai .msg-bubble{background:var(--card);border:1px solid var(--border);color:var(--ivory);border-bottom-left-radius:4px}
+.msg-user .msg-bubble{background:var(--jade);color:var(--ink);font-weight:500;border-bottom-right-radius:4px}
+.msg-meta{font-size:11px;color:var(--muted);margin-top:5px;padding:0 4px}
+.msg-user .msg-meta{text-align:right}
+.typing-indicator{display:flex;align-items:center;gap:4px;padding:14px 16px;background:var(--card);border:1px solid var(--border);border-radius:16px;border-bottom-left-radius:4px;width:fit-content}
+.typing-dot{width:7px;height:7px;background:var(--muted);border-radius:50%;animation:tdot .9s ease-in-out infinite}
+.typing-dot:nth-child(2){animation-delay:.15s}
+.typing-dot:nth-child(3){animation-delay:.3s}
+@keyframes tdot{0%,60%,100%{transform:translateY(0)}30%{transform:translateY(-8px)}}
+.chat-input-area{padding:16px 20px;border-top:1px solid var(--border);display:flex;gap:10px;flex-shrink:0}
+.chat-input{
+  flex:1;background:var(--card);border:1.5px solid var(--border);
+  color:var(--ivory);font-family:var(--sans);font-size:14px;font-weight:400;
+  padding:12px 16px;border-radius:12px;outline:none;
+  transition:border-color .2s;resize:none;height:46px;line-height:1.4;
+}
+.chat-input:focus{border-color:var(--jade)}
+.chat-input::placeholder{color:var(--muted)}
+.send-btn{
+  width:46px;height:46px;border-radius:12px;background:var(--jade);
+  border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:18px;transition:all .2s;flex-shrink:0;color:var(--ink);font-weight:700;
+}
+.send-btn:hover{background:#00d4aa;transform:scale(1.05)}
+.send-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.chat-mode-bar{padding:10px 20px 0;display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap}
+.mode-chip{background:var(--dim);border:1px solid var(--border);color:var(--muted);font-size:12px;font-weight:500;padding:5px 12px;border-radius:100px;cursor:pointer;transition:all .15s;border:none;font-family:var(--sans)}
+.mode-chip.active,.mode-chip:hover{background:var(--jade-dim);color:var(--jade);border:1px solid rgba(0,184,148,.3)}
+
+/* ── SECTIONS ── */
+.section{padding:100px 5vw}
+.section-alt{background:var(--surface)}
+.sec-eyebrow{font-size:11px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--jade);margin-bottom:16px}
+.sec-h{font-family:var(--serif);font-size:clamp(32px,4vw,54px);line-height:1.05;letter-spacing:-.02em;color:var(--ivory);margin-bottom:16px}
+.sec-sub{font-size:17px;font-weight:300;color:var(--muted);line-height:1.8;max-width:520px}
+
+/* ── FEATURES BENTO ── */
+.bento{display:grid;grid-template-columns:repeat(12,1fr);grid-template-rows:auto;gap:16px;margin-top:60px}
+.bento-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:32px;transition:border-color .25s var(--ease),transform .25s var(--ease)}
+.bento-card:hover{border-color:var(--jade);transform:translateY(-3px)}
+.bc-1{grid-column:span 5}
+.bc-2{grid-column:span 7}
+.bc-3{grid-column:span 4}
+.bc-4{grid-column:span 4}
+.bc-5{grid-column:span 4}
+.bc-6{grid-column:span 12}
+.bc-icon{font-size:32px;margin-bottom:20px;display:block}
+.bc-title{font-family:var(--serif);font-size:22px;color:var(--ivory);margin-bottom:10px;letter-spacing:-.01em}
+.bc-desc{font-size:14px;color:var(--muted);line-height:1.7;font-weight:300}
+.bc-tag{display:inline-block;margin-top:14px;font-size:11px;font-weight:600;letter-spacing:.08em;padding:5px 12px;border-radius:100px;background:var(--jade-dim);color:var(--jade)}
+
+/* AI Demo inside bento */
+.mini-ai-demo{margin-top:20px;background:var(--surface);border-radius:var(--r);padding:16px;border:1px solid var(--border)}
+.mai-q{font-size:13px;color:var(--muted);margin-bottom:10px}
+.mai-ans{font-size:14px;color:var(--ivory);line-height:1.65;min-height:40px}
+.mai-cursor{display:inline-block;width:2px;height:14px;background:var(--jade);margin-left:2px;vertical-align:middle;animation:blink .7s step-end infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+.mai-btn{margin-top:14px;background:none;border:1px solid var(--border);color:var(--jade);font-size:12px;font-weight:600;padding:7px 16px;border-radius:100px;cursor:pointer;font-family:var(--sans);transition:all .2s}
+.mai-btn:hover{background:var(--jade-dim);border-color:rgba(0,184,148,.4)}
+
+/* ── CURRICULUM ── */
+.curriculum-wrap{margin-top:60px;display:flex;gap:20px;flex-wrap:wrap}
+.curr-sidebar{width:220px;flex-shrink:0;display:flex;flex-direction:column;gap:4px}
+.curr-tab{background:none;border:none;text-align:left;padding:12px 16px;border-radius:var(--r);color:var(--muted);font-family:var(--sans);font-size:14px;font-weight:500;cursor:pointer;transition:all .15s;border:1px solid transparent;display:flex;align-items:center;gap:10px}
+.curr-tab.active,.curr-tab:hover{background:var(--card);color:var(--ivory);border-color:var(--border)}
+.curr-tab.active{border-color:var(--jade);color:var(--jade)}
+.curr-tab-icon{font-size:18px;flex-shrink:0}
+.curr-main{flex:1;min-width:0;background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden}
+.curr-pane{display:none;padding:36px;animation:fade-in .25s ease}
+.curr-pane.active{display:block}
+@keyframes fade-in{from{opacity:0}to{opacity:1}}
+.curr-lesson-list{display:flex;flex-direction:column;gap:0}
+.curr-lesson{display:flex;align-items:center;gap:16px;padding:16px 0;border-bottom:1px solid var(--border)}
+.curr-lesson:last-child{border-bottom:none}
+.cl-num{width:32px;height:32px;border-radius:50%;background:var(--dim);color:var(--muted);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0}
+.curr-lesson.done .cl-num{background:var(--jade-dim);color:var(--jade)}
+.curr-lesson.locked .cl-num{opacity:.4}
+.cl-info h4{font-size:15px;font-weight:500;color:var(--ivory);margin-bottom:3px}
+.curr-lesson.locked .cl-info h4{color:var(--muted)}
+.cl-info span{font-size:12px;color:var(--muted)}
+.cl-badge{margin-left:auto;font-size:11px;font-weight:600;letter-spacing:.05em;padding:4px 10px;border-radius:100px;flex-shrink:0}
+.badge-done{background:var(--jade-dim);color:var(--jade)}
+.badge-new{background:var(--amber-dim);color:var(--amber)}
+.badge-locked{background:var(--dim);color:var(--muted);opacity:.6}
+
+/* ── INTERACTIVE LESSON ── */
+.lesson-app{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);margin-top:60px;overflow:hidden}
+.lesson-topbar{padding:20px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.lesson-title-sm{font-size:15px;font-weight:600;color:var(--ivory);flex:1}
+.xp-pill{display:flex;align-items:center;gap:6px;background:var(--amber-dim);border:1px solid rgba(240,165,0,.25);color:var(--amber);font-size:12px;font-weight:600;padding:5px 12px;border-radius:100px}
+.hp-pill{display:flex;align-items:center;gap:6px;background:rgba(232,67,147,.1);border:1px solid rgba(232,67,147,.25);color:var(--rose);font-size:12px;font-weight:600;padding:5px 12px;border-radius:100px}
+.streak-pill{display:flex;align-items:center;gap:6px;background:var(--lav-dim);border:1px solid rgba(124,92,191,.25);color:var(--lav);font-size:12px;font-weight:600;padding:5px 12px;border-radius:100px}
+.lesson-progress{height:6px;background:var(--border);position:relative;flex-basis:100%}
+.lesson-prog-fill{height:100%;background:linear-gradient(90deg,var(--jade),#00d4aa);border-radius:3px;transition:width .4s var(--ease)}
+
+.lesson-body{display:grid;grid-template-columns:1fr 1fr;min-height:420px}
+.lesson-ex{padding:40px;border-right:1px solid var(--border)}
+.lesson-feedback{padding:40px;background:var(--surface);display:flex;flex-direction:column}
+.ex-label{font-size:11px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--jade);margin-bottom:20px}
+.ex-question{font-family:var(--serif);font-size:22px;color:var(--ivory);line-height:1.4;margin-bottom:28px}
+.ex-options{display:flex;flex-direction:column;gap:10px}
+.ex-opt{background:var(--ink2);border:1.5px solid var(--border);color:var(--ivory);font-family:var(--sans);font-size:15px;font-weight:400;padding:14px 18px;border-radius:var(--r);cursor:pointer;text-align:left;transition:all .15s var(--ease)}
+.ex-opt:hover:not(:disabled){border-color:var(--jade);background:var(--jade-dim);color:var(--ivory)}
+.ex-opt.correct{border-color:var(--jade)!important;background:var(--jade-dim)!important;color:var(--jade)!important;font-weight:500}
+.ex-opt.wrong{border-color:var(--rose)!important;background:rgba(232,67,147,.1)!important;color:var(--rose)!important}
+.ex-opt:disabled{cursor:not-allowed}
+.feedback-label{font-size:11px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+.feedback-body{flex:1;font-size:14px;color:var(--ivory);line-height:1.75;font-weight:300}
+.feedback-body.loading{color:var(--muted);font-style:italic}
+.feedback-actions{margin-top:24px;display:flex;gap:10px}
+
+/* ── GRAMMAR CHECKER ── */
+.grammar-tool{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);margin-top:60px;overflow:hidden}
+.gt-header{padding:24px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.gt-icon{width:36px;height:36px;border-radius:10px;background:var(--amber-dim);display:flex;align-items:center;justify-content:center;font-size:18px}
+.gt-title{font-size:16px;font-weight:600;color:var(--ivory)}
+.gt-sub{font-size:13px;color:var(--muted)}
+.gt-body{display:grid;grid-template-columns:1fr 1fr;min-height:320px}
+.gt-input-wrap{padding:28px;border-right:1px solid var(--border)}
+.gt-textarea{width:100%;height:160px;background:var(--surface);border:1.5px solid var(--border);color:var(--ivory);font-family:var(--sans);font-size:15px;font-weight:400;padding:16px;border-radius:var(--r);outline:none;resize:none;transition:border-color .2s;line-height:1.65}
+.gt-textarea:focus{border-color:var(--amber)}
+.gt-textarea::placeholder{color:var(--muted)}
+.gt-check-btn{margin-top:14px;background:var(--amber);color:var(--ink);font-family:var(--sans);font-size:14px;font-weight:600;padding:11px 24px;border-radius:100px;border:none;cursor:pointer;transition:all .2s}
+.gt-check-btn:hover{background:#ffb700;transform:translateY(-1px)}
+.gt-check-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.gt-result{padding:28px;overflow-y:auto}
+.gt-result-label{font-size:11px;font-weight:600;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+.gt-result-body{font-size:14px;color:var(--ivory);line-height:1.8;font-weight:300}
+.gt-result-body.placeholder{color:var(--muted);font-style:italic}
+.gt-score{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding:14px 16px;background:var(--surface);border-radius:var(--r);border:1px solid var(--border)}
+.score-ring{width:48px;height:48px;flex-shrink:0}
+.score-val{font-family:var(--serif);font-size:20px;color:var(--ivory)}
+.score-label{font-size:12px;color:var(--muted)}
+
+/* ── WRITING COACH ── */
+.writing-tool{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);margin-top:24px;overflow:hidden}
+.wt-header{padding:24px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px}
+.wt-icon{width:36px;height:36px;border-radius:10px;background:var(--lav-dim);display:flex;align-items:center;justify-content:center;font-size:18px}
+.wt-body{padding:28px;display:flex;flex-direction:column;gap:16px}
+.wt-prompt-bar{display:flex;gap:10px;flex-wrap:wrap}
+.wt-prompt-chip{background:var(--dim);border:1px solid var(--border);color:var(--muted);font-size:13px;font-weight:500;padding:8px 16px;border-radius:100px;cursor:pointer;font-family:var(--sans);transition:all .15s}
+.wt-prompt-chip.active,.wt-prompt-chip:hover{background:var(--lav-dim);color:#a584e8;border-color:rgba(124,92,191,.4)}
+.wt-textarea{width:100%;height:120px;background:var(--surface);border:1.5px solid var(--border);color:var(--ivory);font-family:var(--sans);font-size:14px;padding:14px;border-radius:var(--r);outline:none;resize:none;transition:border-color .2s;line-height:1.65}
+.wt-textarea:focus{border-color:var(--lav)}
+.wt-textarea::placeholder{color:var(--muted)}
+.wt-actions{display:flex;gap:10px;align-items:center}
+.btn-lav{background:var(--lav);color:#fff;font-family:var(--sans);font-size:14px;font-weight:600;padding:11px 24px;border-radius:100px;border:none;cursor:pointer;transition:all .2s}
+.btn-lav:hover{background:#9470d4;transform:translateY(-1px)}
+.btn-lav:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.wt-word-count{font-size:12px;color:var(--muted);margin-left:auto}
+.wt-result{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px;font-size:14px;color:var(--ivory);line-height:1.8;font-weight:300;min-height:80px}
+.wt-result.placeholder{color:var(--muted);font-style:italic}
+
+/* ── PROGRESS DASHBOARD ── */
+.dashboard{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);margin-top:60px;overflow:hidden}
+.dash-header{padding:24px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.dash-user{display:flex;align-items:center;gap:14px}
+.dash-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--jade),var(--lav));display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.dash-name{font-size:16px;font-weight:600;color:var(--ivory)}
+.dash-level{font-size:13px;color:var(--jade);font-weight:500}
+.dash-streak{display:flex;align-items:center;gap:6px;font-size:14px;font-weight:600;color:var(--amber)}
+.dash-body{display:grid;grid-template-columns:repeat(4,1fr);border-bottom:1px solid var(--border)}
+.dash-stat{padding:24px 20px;border-right:1px solid var(--border);text-align:center}
+.dash-stat:last-child{border-right:none}
+.ds-val{font-family:var(--serif);font-size:32px;color:var(--ivory);letter-spacing:-.02em}
+.ds-val span{color:var(--jade);font-size:20px}
+.ds-label{font-size:12px;color:var(--muted);margin-top:4px}
+.dash-skills{padding:28px;display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.skill-bar-wrap{display:flex;flex-direction:column;gap:8px}
+.skill-bar-label{display:flex;justify-content:space-between;font-size:13px;font-weight:500}
+.skill-bar-label span:first-child{color:var(--ivory)}
+.skill-bar-label span:last-child{color:var(--jade)}
+.skill-bar{background:var(--dim);border-radius:100px;height:8px;overflow:hidden}
+.skill-bar-fill{height:100%;border-radius:100px;transition:width 1s var(--ease)}
+.fill-jade{background:linear-gradient(90deg,var(--jade),#00d4aa)}
+.fill-amber{background:linear-gradient(90deg,var(--amber),#ffcc44)}
+.fill-lav{background:linear-gradient(90deg,var(--lav),#a584e8)}
+.fill-rose{background:linear-gradient(90deg,var(--rose),#f06cb0)}
+
+/* ── PRICING ── */
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:60px}
+.pc{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:36px 28px;position:relative;transition:border-color .2s}
+.pc:hover:not(.pc-featured){border-color:var(--dim)}
+.pc-featured{border-color:var(--jade);background:linear-gradient(160deg,rgba(0,184,148,.06),var(--card))}
+.pc-badge{position:absolute;top:-13px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,var(--jade),#00d4aa);color:var(--ink);font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 18px;border-radius:100px;white-space:nowrap}
+.pc-plan{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+.pc-amt{font-family:var(--serif);font-size:50px;letter-spacing:-.03em;line-height:1;color:var(--ivory)}
+.pc-curr{font-size:20px;font-weight:300;vertical-align:super;margin-right:2px}
+.pc-period{font-size:13px;color:var(--muted);margin-top:8px}
+.pc-desc{font-size:14px;color:var(--muted);font-weight:300;margin-top:12px;line-height:1.65;border-top:1px solid var(--border);padding-top:20px;margin-top:20px}
+.pc-list{list-style:none;margin-top:20px;display:flex;flex-direction:column;gap:11px}
+.pc-list li{display:flex;align-items:flex-start;gap:9px;font-size:14px;color:var(--ivory);font-weight:400;line-height:1.45}
+.pc-list li.off{opacity:.35}
+.check{color:var(--jade);font-size:14px;flex-shrink:0;margin-top:1px}
+.cross{color:var(--muted);font-size:14px;flex-shrink:0;margin-top:1px}
+.pc-btn{display:block;text-align:center;margin-top:28px;padding:14px;border-radius:100px;font-size:15px;font-weight:600;cursor:pointer;border:none;font-family:var(--sans);transition:all .2s;text-decoration:none}
+.pc-btn-outline{border:1.5px solid var(--border);background:transparent;color:var(--ivory)}
+.pc-btn-outline:hover{border-color:var(--jade);color:var(--jade)}
+.pc-btn-jade{background:var(--jade);color:var(--ink)}
+.pc-btn-jade:hover{background:#00d4aa;box-shadow:0 8px 28px rgba(0,184,148,.3);transform:translateY(-2px)}
+
+/* ── FAQ ── */
+.faq-wrap{margin-top:60px}
+.faq-item{border-bottom:1px solid var(--border)}
+.faq-q{display:flex;align-items:center;justify-content:space-between;padding:22px 0;cursor:pointer;gap:16px}
+.faq-q h3{font-size:16px;font-weight:500;color:var(--ivory);line-height:1.4}
+.faq-arr{font-size:18px;color:var(--muted);transition:transform .25s var(--ease);flex-shrink:0}
+.faq-item.open .faq-arr{transform:rotate(45deg);color:var(--jade)}
+.faq-ans{font-size:15px;color:var(--muted);line-height:1.85;font-weight:300;max-height:0;overflow:hidden;transition:max-height .35s var(--ease),padding .3s}
+.faq-item.open .faq-ans{max-height:400px;padding-bottom:22px}
+
+/* ── CTA ── */
+.cta-section{background:var(--surface);border-top:1px solid var(--border);text-align:center;padding:120px 5vw}
+.cta-h{font-family:var(--serif);font-size:clamp(38px,6vw,80px);line-height:1;letter-spacing:-.03em;color:var(--ivory);margin-bottom:24px}
+.cta-h i{font-style:italic;color:var(--jade)}
+.cta-sub{font-size:18px;color:var(--muted);font-weight:300;margin-bottom:48px;line-height:1.8}
+
+/* ── FOOTER ── */
+footer{background:var(--ink);border-top:1px solid var(--border);padding:60px 5vw 36px}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;margin-bottom:48px}
+.footer-brand p{font-size:14px;color:var(--muted);line-height:1.75;font-weight:300;margin-top:12px;max-width:260px}
+.footer-col h4{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);margin-bottom:18px}
+.footer-col ul{list-style:none;display:flex;flex-direction:column;gap:10px}
+.footer-col a{font-size:14px;color:var(--dim);text-decoration:none;transition:color .2s}
+.footer-col a:hover{color:var(--ivory)}
+.footer-bottom{display:flex;align-items:center;justify-content:space-between;padding-top:32px;border-top:1px solid var(--border);flex-wrap:wrap;gap:16px}
+.footer-bottom p{font-size:12px;color:var(--muted)}
+
+/* ── REVEAL ANIMATIONS ── */
+.reveal{opacity:0;transform:translateY(20px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.reveal.visible{opacity:1;transform:none}
+.reveal-delay-1{transition-delay:.1s}
+.reveal-delay-2{transition-delay:.2s}
+.reveal-delay-3{transition-delay:.3s}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--card);border:1px solid var(--jade);color:var(--ivory);font-size:14px;font-weight:500;padding:14px 20px;border-radius:var(--r);z-index:9999;transform:translateX(120%);transition:transform .35s var(--ease);max-width:320px;box-shadow:0 8px 32px rgba(0,0,0,.4)}
+.toast.show{transform:translateX(0)}
+.toast .t-icon{color:var(--jade);margin-right:8px}
+
+/* ── LOADING SPINNER ── */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--jade);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── MOBILE ── */
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr}
+  .hero-right{display:none}
+  .bento{grid-template-columns:1fr 1fr}
+  .bc-1,.bc-2,.bc-3,.bc-4,.bc-5,.bc-6{grid-column:span 2}
+  .pricing-grid{grid-template-columns:1fr}
+  .lesson-body{grid-template-columns:1fr}
+  .lesson-feedback{border-top:1px solid var(--border)}
+  .gt-body{grid-template-columns:1fr}
+  .dash-body{grid-template-columns:1fr 1fr}
+  .dash-skills{grid-template-columns:1fr}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  .footer-grid>:first-child{grid-column:span 2}
+  .nav-links{display:none}
+  .nav-toggle{display:block}
+  .curr-sidebar{width:100%}
+  .curriculum-wrap{flex-direction:column}
+}
+@media(max-width:600px){
+  .bento{grid-template-columns:1fr}
+  .bc-1,.bc-2,.bc-3,.bc-4,.bc-5,.bc-6{grid-column:span 1}
+  .dash-body{grid-template-columns:1fr 1fr}
+  .footer-grid{grid-template-columns:1fr}
+  .footer-grid>:first-child{grid-column:span 1}
+}
+@media(prefers-reduced-motion:reduce){
+  .reveal{opacity:1;transform:none}
+  *{animation-duration:0.01ms!important;transition-duration:0.01ms!important}
+}
+</style>
+</head>
+<body>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span class="t-icon">✓</span><span id="toast-msg"></span></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#" class="logo">FLUENT<sup>AI</sup></a>
+  <ul class="nav-links">
+    <li><a href="#features">Возможности</a></li>
+    <li><a href="#lessons">Уроки</a></li>
+    <li><a href="#ai-tools">AI-инструменты</a></li>
+    <li><a href="#progress">Прогресс</a></li>
+    <li><a href="#pricing">Цены</a></li>
+    <li><a href="#hero-chat" class="nav-btn">Поговорить с AI →</a></li>
+  </ul>
+  <button class="nav-toggle" onclick="document.querySelector('.nav-links').style.display='flex';document.querySelector('.nav-links').style.flexDirection='column';document.querySelector('.nav-links').style.position='fixed';document.querySelector('.nav-links').style.top='73px';document.querySelector('.nav-links').style.left='0';document.querySelector('.nav-links').style.right='0';document.querySelector('.nav-links').style.background='var(--ink2)';document.querySelector('.nav-links').style.padding='20px';document.querySelector('.nav-links').style.gap='16px'">☰</button>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="hero-chat">
+  <div class="hero-left">
+    <div class="hero-pill"><span class="live-dot"></span>AI-наставник онлайн прямо сейчас</div>
+    <h1>Английский,<br/>который<br/><i>действительно</i><br/>работает</h1>
+    <p class="hero-sub">Живой AI-наставник исправляет тебя в реальном времени. Никаких учебников — только настоящие разговоры, грамматика без боли и мгновенная обратная связь.</p>
+    <div class="hero-actions">
+      <a href="#ai-tools" class="btn btn-jade">Начать бесплатно →</a>
+      <a href="#lessons" class="btn btn-ghost">Посмотреть уроки</a>
+    </div>
+    <div class="hero-numbers">
+      <div><div class="hn-val">62<span>k+</span></div><div class="hn-label">Студентов</div></div>
+      <div><div class="hn-val">4.97<span>★</span></div><div class="hn-label">Оценка</div></div>
+      <div><div class="hn-val">93<span>%</span></div><div class="hn-label">Заканчивают курс</div></div>
+    </div>
+  </div>
+
+  <!-- LIVE AI CHAT -->
+  <div class="hero-right chat-panel">
+    <div class="chat-header">
+      <div class="ai-avatar">🤖</div>
+      <div>
+        <div class="chat-ai-name">Aria — AI English Coach</div>
+        <div class="chat-ai-status">онлайн</div>
+      </div>
+    </div>
+    <div class="chat-mode-bar">
+      <button class="mode-chip active" data-mode="general" onclick="setMode(this)">💬 Свободный разговор</button>
+      <button class="mode-chip" data-mode="grammar" onclick="setMode(this)">✏️ Грамматика</button>
+      <button class="mode-chip" data-mode="vocab" onclick="setMode(this)">📚 Словарь</button>
+      <button class="mode-chip" data-mode="correct" onclick="setMode(this)">🔍 Исправить меня</button>
+    </div>
+    <div class="chat-messages" id="chat-messages">
+      <div class="msg msg-ai">
+        <div class="msg-bubble">Привет! Я Aria — твой AI-тренер по английскому 🎉<br/><br/>Можем говорить на любую тему, я буду мягко исправлять ошибки и объяснять правила прямо в процессе разговора.<br/><br/>С чего начнём? Напиши что-нибудь по-английски — или спроси что хочешь!</div>
+        <div class="msg-meta">Aria · сейчас</div>
+      </div>
+    </div>
+    <div class="chat-input-area">
+      <textarea class="chat-input" id="chat-input" placeholder="Напиши сообщение или вопрос..." rows="1" onkeydown="handleChatKey(event)" oninput="autoResize(this)"></textarea>
+      <button class="send-btn" id="send-btn" onclick="sendMessage()">↑</button>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES BENTO -->
+<section class="section" id="features">
+  <div class="sec-eyebrow reveal">Возможности платформы</div>
+  <h2 class="sec-h reveal">Всё что нужно<br/>для свободного English</h2>
+  <div class="bento">
+    <div class="bento-card bc-1 reveal">
+      <span class="bc-icon">🧠</span>
+      <div class="bc-title">AI-разговорный тренер</div>
+      <p class="bc-desc">Говори с AI на любую тему. Он понимает контекст, исправляет ошибки естественно — как живой репетитор, только доступен 24/7 и никогда не устаёт.</p>
+      <span class="bc-tag">✨ Работает прямо сейчас</span>
+    </div>
+    <div class="bento-card bc-2 reveal reveal-delay-1">
+      <span class="bc-icon">✍️</span>
+      <div class="bc-title">Мгновенная проверка грамматики</div>
+      <p class="bc-desc">Напиши текст — получи детальный разбор ошибок с объяснениями на русском и исправленной версией. AI не просто подчёркивает, а объясняет почему так правильно.</p>
+      <div class="mini-ai-demo" id="mini-demo">
+        <div class="mai-q">Пример: "I am go to school yesterday"</div>
+        <div class="mai-ans" id="mini-ans">Нажми кнопку, чтобы увидеть разбор от AI →</div>
+        <button class="mai-btn" onclick="runMiniDemo()">Показать разбор</button>
+      </div>
+    </div>
+    <div class="bento-card bc-3 reveal">
+      <span class="bc-icon">📊</span>
+      <div class="bc-title">Личный дашборд</div>
+      <p class="bc-desc">Отслеживай прогресс по навыкам: говорение, чтение, грамматика, словарный запас. Вижу где провалы — знаю что тренировать.</p>
+      <span class="bc-tag">XP · Стрики · Уровни</span>
+    </div>
+    <div class="bento-card bc-4 reveal reveal-delay-1">
+      <span class="bc-icon">🎯</span>
+      <div class="bc-title">Адаптивные уроки</div>
+      <p class="bc-desc">Система запоминает твои слабые места и строит уроки вокруг них. Чем больше учишься — тем точнее программа.</p>
+      <span class="bc-tag">Персональный план</span>
+    </div>
+    <div class="bento-card bc-5 reveal reveal-delay-2">
+      <span class="bc-icon">🎧</span>
+      <div class="bc-title">Живое аудирование</div>
+      <p class="bc-desc">Диалоги носителей, реальные акценты, разбор сложных слов. Слушай как говорят в жизни, а не как в учебнике.</p>
+      <span class="bc-tag">American · British · Australian</span>
+    </div>
+    <div class="bento-card bc-6 reveal">
+      <div style="display:flex;align-items:center;gap:48px;flex-wrap:wrap">
+        <div style="flex:1;min-width:200px">
+          <span class="bc-icon">🏆</span>
+          <div class="bc-title">Геймификация и мотивация</div>
+          <p class="bc-desc">XP за каждый урок, ежедневные стрики, лиги и соревнования с другими студентами. Учёба должна быть интересной.</p>
+        </div>
+        <div style="display:flex;gap:16px;flex-wrap:wrap">
+          <div style="text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px 24px">
+            <div style="font-family:var(--serif);font-size:36px;color:var(--amber)">🔥 47</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px">дней стрик</div>
+          </div>
+          <div style="text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px 24px">
+            <div style="font-family:var(--serif);font-size:36px;color:var(--jade)">2840</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px">XP заработано</div>
+          </div>
+          <div style="text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:20px 24px">
+            <div style="font-family:var(--serif);font-size:36px;color:var(--lav)">🥇</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:4px">Золотая лига</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CURRICULUM -->
+<section class="section section-alt" id="lessons">
+  <div class="sec-eyebrow reveal">Программа</div>
+  <h2 class="sec-h reveal">120 уроков — от нуля<br/>до уверенного B2</h2>
+  <p class="sec-sub reveal">Каждый урок — это мини-приключение с видео, практикой, AI-проверкой и игровыми элементами.</p>
+  <div class="curriculum-wrap reveal">
+    <div class="curr-sidebar">
+      <button class="curr-tab active" onclick="showCurr('a1',this)"><span class="curr-tab-icon">🌱</span>Beginner A1</button>
+      <button class="curr-tab" onclick="showCurr('a2',this)"><span class="curr-tab-icon">📘</span>Elementary A2</button>
+      <button class="curr-tab" onclick="showCurr('b1',this)"><span class="curr-tab-icon">🚀</span>Pre-Int B1</button>
+      <button class="curr-tab" onclick="showCurr('b2',this)"><span class="curr-tab-icon">⭐</span>Intermediate B2</button>
+      <button class="curr-tab" onclick="showCurr('biz',this)"><span class="curr-tab-icon">🏢</span>Business</button>
+    </div>
+    <div class="curr-main">
+      <div class="curr-pane active" id="curr-a1">
+        <h3 style="font-family:var(--serif);font-size:22px;color:var(--ivory);margin-bottom:6px">Beginner A1 — Фундамент</h3>
+        <p style="font-size:14px;color:var(--muted);margin-bottom:24px;font-weight:300">Начни с нуля и построй уверенный фундамент за первый месяц</p>
+        <div class="curr-lesson-list">
+          <div class="curr-lesson done"><div class="cl-num">1</div><div class="cl-info"><h4>Алфавит и звуки</h4><span>Видео · 15 мин · AI-практика</span></div><span class="cl-badge badge-done">✓ Готово</span></div>
+          <div class="curr-lesson done"><div class="cl-num">2</div><div class="cl-info"><h4>Приветствия и знакомство</h4><span>Диалог · 20 мин · AI-разговор</span></div><span class="cl-badge badge-done">✓ Готово</span></div>
+          <div class="curr-lesson done"><div class="cl-num">3</div><div class="cl-info"><h4>Числа и даты</h4><span>Упражнения · 18 мин</span></div><span class="cl-badge badge-done">✓ Готово</span></div>
+          <div class="curr-lesson"><div class="cl-num" style="background:var(--jade-dim);color:var(--jade)">4</div><div class="cl-info"><h4>Present Simple — глагол to be</h4><span>Грамматика · 25 мин · AI-объяснение</span></div><span class="cl-badge badge-new">Текущий</span></div>
+          <div class="curr-lesson locked"><div class="cl-num">5</div><div class="cl-info"><h4>Моя семья и дом</h4><span>Словарь · 20 мин · 50 слов</span></div><span class="cl-badge badge-locked">🔒 Заперто</span></div>
+          <div class="curr-lesson locked"><div class="cl-num">6</div><div class="cl-info"><h4>Еда и напитки</h4><span>Диалог · кафе · AI-ролевая игра</span></div><span class="cl-badge badge-locked">🔒 Заперто</span></div>
+          <div class="curr-lesson locked"><div class="cl-num">7</div><div class="cl-info"><h4>Мой день — Present Simple</h4><span>Грамматика + практика · 30 мин</span></div><span class="cl-badge badge-locked">🔒 Заперто</span></div>
+        </div>
+      </div>
+      <div class="curr-pane" id="curr-a2">
+        <h3 style="font-family:var(--serif);font-size:22px;color:var(--ivory);margin-bottom:6px">Elementary A2 — Разговорная практика</h3>
+        <p style="font-size:14px;color:var(--muted);margin-bottom:24px;font-weight:300">Начни говорить в реальных ситуациях</p>
+        <div class="curr-lesson-list">
+          <div class="curr-lesson locked"><div class="cl-num">21</div><div class="cl-info"><h4>В аэропорту</h4><span>Диалог · AI-ролевая игра · 25 мин</span></div><span class="cl-badge badge-locked">🔒</span></div>
+          <div class="curr-lesson locked"><div class="cl-num">22</div><div class="cl-info"><h4>Past Simple — прошедшее время</h4><span>Грамматика · 35 мин · 80 упражнений</span></div><span class="cl-badge badge-locked">🔒</span></div>
+          <div class="curr-lesson locked"><div class="cl-num">23</div><div class="cl-info"><h4>Покупки и магазины</h4><span>Словарь · диалог · 30 мин</span></div><span class="cl-badge badge-locked">🔒</span></div>
+          <div class="curr-lesson locked"><div class="cl-num">24</div><div class="cl-info"><h4>Описание людей и мест</h4><span>Прилагательные · письмо · AI-проверка</span></div><span class="cl-badge badge-locked">🔒</span></div>
+          <div class="curr-lesson locked"><div class="cl-num">25</div><div class="cl-info"><h4>Future: going to / will</h4><span>Грамматика · 40 мин</span></div><span class="cl-badge badge-locked">🔒</span></div>
+        </div>
+      </div>
+      <div class="curr-pane" id="curr-b1">
+        <h3 style="font-family:var(--serif);font-size:22px;color:var(--ivory);margin-bottom:6px">Pre-Intermediate B1 — Уверенность</h3>
+        <p style="font-size:14px;color:var(--muted);margin-bottom:24px;font-weight:300">Сложная грамматика и живые диалоги</p>
+        <div class="curr-lesson-list">
+          <div class="curr-lesson locked"><div class="cl-num">51</div><div class="cl-info"><h4>Present Perfect — опыт и результат</h4><span>Грамматика · 45 мин · AI-объяснение</span></div><span class="cl-badge badge-locked">🔒</span></div>
+          <div class="curr-lesson locked"><div class="cl-num">52</div><div class="cl-info"><h4>Условные предложения (1-й тип)</h4><span>Грамматика · практика · 40 мин</span></div><span class="cl-badge badge-locked">🔒</span></div>
+          <div class="curr-lesson locked"><div class="cl-num">53</div><div class="cl-info"><h4>Фильмы и подкасты: аудирование B1</h4><span>Аудио · субтитры · вопросы · 35 мин</span></div><span class="cl-badge badge-locked">🔒</span></div>
+          <div class="curr-lesson locked"><div class="cl-num">54</div><div class="cl-info"><h4>Дискуссия: мнения и аргументы</h4><span>AI-дискуссия · 30 мин</span></div><span class="cl-badge badge-locked">🔒</span></div>
+        </div>
+      </div>
+      <div class="curr-pane" id="curr-b2">
+        <h3 style="font-family:var(--serif);font-size:22px;color:var(--ivory);margin-bottom:6px">Intermediate B2 — Свобода</h3>
+        <p style="font-size:14px;color:var(--muted);margin-bottom:24px;font-weight:300">Говори свободно на любую тему</p>
+        <div class="curr-lesson-list">
+          <div class="curr-lesson locked"><div class="cl-num">81</div><div class="cl-info"><h4>Advanced Grammar: Passive Voice</h4><span>Грамматика · 50 мин</span></div><span class="cl-badge badge-locked">🔒</span></div>
+          <div class="curr-lesson locked"><div class="cl-num">82</div><div class="cl-info"><h4>Идиомы и фразовые глаголы</h4><span>100 идиом · карточки · AI-контекст</span></div><span class="cl-badge badge-locked">🔒</span></div>
+          <div class="curr-lesson locked"><div class="cl-num">83</div><div class="cl-info"><h4>Эссе и аргументативное письмо</h4><span>AI-тренер письма · 45 мин</span></div><span class="cl-badge badge-locked">🔒</span></div>
+        </div>
+      </div>
+      <div class="curr-pane" id="curr-biz">
+        <h3 style="font-family:var(--serif);font-size:22px;color:var(--ivory);margin-bottom:6px">Business English — Карьера</h3>
+        <p style="font-size:14px;color:var(--muted);margin-bottom:24px;font-weight:300">Для работы в международных компаниях</p>
+        <div class="curr-lesson-list">
+          <div class="curr-lesson locked"><div class="cl-num">101</div><div class="cl-info"><h4>Деловое письмо и email</h4><span>Шаблоны · AI-проверка · 40 мин</span></div><span class="cl-badge badge-locked">🔒</span></div>
+          <div class="curr-lesson locked"><div class="cl-num">102</div><div class="cl-info"><h4>Собеседование на работу</h4><span>AI-интервью · разбор ответов · 50 мин</span></div><span class="cl-badge badge-locked">🔒</span></div>
+          <div class="curr-lesson locked"><div class="cl-num">103</div><div class="cl-info"><h4>Презентации и переговоры</h4><span>AI-симуляция переговоров · 45 мин</span></div><span class="cl-badge badge-locked">🔒</span></div>
+          <div class="curr-lesson locked"><div class="cl-num">104</div><div class="cl-info"><h4>Конференц-звонки и встречи</h4><span>Диалог · фразы · AI-практика</span></div><span class="cl-badge badge-locked">🔒</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INTERACTIVE LESSON -->
+<section class="section" id="try-lesson">
+  <div class="sec-eyebrow reveal">Попробуй урок</div>
+  <h2 class="sec-h reveal">Живой урок прямо<br/>здесь — с AI-объяснением</h2>
+  <p class="sec-sub reveal">Ответь на вопрос — AI объяснит почему так правильно. Настоящий урок, не демонстрация.</p>
+  <div class="lesson-app reveal">
+    <div class="lesson-topbar">
+      <div class="lesson-title-sm">Урок 4: Present Simple — глагол to be</div>
+      <div class="xp-pill">⚡ <span id="xp-count">0</span> XP</div>
+      <div class="hp-pill">❤️ <span id="hp-count">3</span></div>
+      <div class="streak-pill">🔥 <span id="streak-count">0</span> подряд</div>
+      <div class="lesson-progress" style="flex-basis:100%"><div class="lesson-prog-fill" id="lprog" style="width:0%"></div></div>
+    </div>
+    <div class="lesson-body">
+      <div class="lesson-ex">
+        <div class="ex-label" id="ex-label">Вопрос 1 из 5</div>
+        <p class="ex-question" id="ex-question">Загрузка...</p>
+        <div class="ex-options" id="ex-options"></div>
+      </div>
+      <div class="lesson-feedback">
+        <div class="feedback-label">AI-объяснение</div>
+        <div class="feedback-body" id="feedback-body">
+          <span style="color:var(--muted);font-style:italic">Выбери ответ — и я объясню правило на русском языке 🎓</span>
+        </div>
+        <div class="feedback-actions" id="feedback-actions" style="display:none">
+          <button class="btn btn-jade btn-sm" onclick="nextLesson()">Следующий →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AI TOOLS -->
+<section class="section section-alt" id="ai-tools">
+  <div class="sec-eyebrow reveal">AI-инструменты</div>
+  <h2 class="sec-h reveal">Три инструмента,<br/>которые реально работают</h2>
+  <p class="sec-sub reveal">Не симуляция — настоящий AI проверяет твой текст прямо сейчас.</p>
+
+  <!-- GRAMMAR CHECKER -->
+  <div class="grammar-tool reveal">
+    <div class="gt-header">
+      <div class="gt-icon">✏️</div>
+      <div><div class="gt-title">AI Проверка грамматики</div><div class="gt-sub">Напиши текст — получи разбор ошибок с объяснениями</div></div>
+    </div>
+    <div class="gt-body">
+      <div class="gt-input-wrap">
+        <textarea class="gt-textarea" id="gt-input" placeholder="Напиши здесь любой текст на английском...&#10;&#10;Например: I goes to school every day. Yesterday I have seen a good film. She don't like coffee."></textarea>
+        <button class="gt-check-btn" id="gt-btn" onclick="checkGrammar()">✓ Проверить грамматику</button>
+      </div>
+      <div class="gt-result">
+        <div class="gt-result-label">Анализ AI</div>
+        <div class="gt-result-body placeholder" id="gt-result">Введи текст слева и нажми «Проверить» — AI разберёт каждую ошибку и объяснит правило на русском.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WRITING COACH -->
+  <div class="writing-tool reveal">
+    <div class="wt-header">
+      <div class="wt-icon">📝</div>
+      <div><div class="gt-title">AI Тренер письма</div><div class="gt-sub">Тема — ты пишешь — AI даёт обратную связь и улучшенную версию</div></div>
+    </div>
+    <div class="wt-body">
+      <div class="wt-prompt-bar">
+        <button class="wt-prompt-chip active" onclick="setWritingPrompt(this,'Describe your typical day in English (3-5 sentences)')">📅 Мой день</button>
+        <button class="wt-prompt-chip" onclick="setWritingPrompt(this,'Write about your favourite hobby or activity (3-5 sentences)')">🎨 Хобби</button>
+        <button class="wt-prompt-chip" onclick="setWritingPrompt(this,'Write about a place you want to visit and why (3-5 sentences)')">✈️ Путешествие</button>
+        <button class="wt-prompt-chip" onclick="setWritingPrompt(this,'Introduce yourself briefly as if in a job interview (3-5 sentences)')">💼 О себе</button>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;font-size:14px;color:var(--jade);font-weight:500" id="wt-prompt-display">📅 Тема: Describe your typical day in English (3-5 sentences)</div>
+      <textarea class="wt-textarea" id="wt-input" placeholder="Начни писать здесь по-английски..."></textarea>
+      <div class="wt-actions">
+        <button class="btn-lav" id="wt-btn" onclick="checkWriting()">🚀 Отправить на проверку</button>
+        <span class="wt-word-count" id="wt-wc">0 слов</span>
+      </div>
+      <div class="wt-result placeholder" id="wt-result">Напиши текст на тему слева и нажми «Отправить на проверку» — AI оценит, исправит и покажет улучшенную версию.</div>
+    </div>
+  </div>
+</section>
+
+<!-- PROGRESS DASHBOARD -->
+<section class="section" id="progress">
+  <div class="sec-eyebrow reveal">Дашборд</div>
+  <h2 class="sec-h reveal">Твой прогресс<br/>всегда перед глазами</h2>
+  <div class="dashboard reveal">
+    <div class="dash-header">
+      <div class="dash-user">
+        <div class="dash-avatar">👤</div>
+        <div>
+          <div class="dash-name">Студент FLUENT</div>
+          <div class="dash-level">Уровень: Pre-Intermediate B1</div>
+        </div>
+      </div>
+      <div class="dash-streak">🔥 47 дней подряд</div>
+    </div>
+    <div class="dash-body">
+      <div class="dash-stat"><div class="ds-val">127<span>ч</span></div><div class="ds-label">часов обучения</div></div>
+      <div class="dash-stat"><div class="ds-val">2840<span>xp</span></div><div class="ds-label">опыта накоплено</div></div>
+      <div class="dash-stat"><div class="ds-val">1240<span>+</span></div><div class="ds-label">слов в словаре</div></div>
+      <div class="dash-stat"><div class="ds-val">63<span>%</span></div><div class="ds-label">курс пройден</div></div>
+    </div>
+    <div class="dash-skills">
+      <div class="skill-bar-wrap">
+        <div class="skill-bar-label"><span>Грамматика</span><span>74%</span></div>
+        <div class="skill-bar"><div class="skill-bar-fill fill-jade" style="width:74%"></div></div>
+      </div>
+      <div class="skill-bar-wrap">
+        <div class="skill-bar-label"><span>Словарный запас</span><span>61%</span></div>
+        <div class="skill-bar"><div class="skill-bar-fill fill-amber" style="width:61%"></div></div>
+      </div>
+      <div class="skill-bar-wrap">
+        <div class="skill-bar-label"><span>Говорение</span><span>55%</span></div>
+        <div class="skill-bar"><div class="skill-bar-fill fill-lav" style="width:55%"></div></div>
+      </div>
+      <div class="skill-bar-wrap">
+        <div class="skill-bar-label"><span>Аудирование</span><span>68%</span></div>
+        <div class="skill-bar"><div class="skill-bar-fill fill-rose" style="width:68%"></div></div>
+      </div>
+      <div class="skill-bar-wrap">
+        <div class="skill-bar-label"><span>Письмо</span><span>52%</span></div>
+        <div class="skill-bar"><div class="skill-bar-fill fill-jade" style="width:52%"></div></div>
+      </div>
+      <div class="skill-bar-wrap">
+        <div class="skill-bar-label"><span>Произношение</span><span>47%</span></div>
+        <div class="skill-bar"><div class="skill-bar-fill fill-amber" style="width:47%"></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section section-alt" id="pricing">
+  <div class="sec-eyebrow reveal">Цены</div>
+  <h2 class="sec-h reveal">Начни бесплатно.<br/>Плати когда влюбишься.</h2>
+  <div class="pricing-grid">
+    <div class="pc reveal">
+      <div class="pc-plan">Бесплатно</div>
+      <div class="pc-amt"><span class="pc-curr">$</span>0</div>
+      <div class="pc-period">навсегда</div>
+      <p class="pc-desc">Попробуй без карты — убедись что работает.</p>
+      <ul class="pc-list">
+        <li><span class="check">✓</span>Курс Beginner A1 полностью</li>
+        <li><span class="check">✓</span>30 AI-сообщений в день</li>
+        <li><span class="check">✓</span>5 проверок грамматики в день</li>
+        <li><span class="check">✓</span>200 словарных карточек</li>
+        <li><span class="check">✓</span>Базовый дашборд прогресса</li>
+        <li class="off"><span class="cross">✕</span>Полный доступ к курсам</li>
+        <li class="off"><span class="cross">✕</span>Безлимитный AI-тренер</li>
+        <li class="off"><span class="cross">✕</span>Сертификат</li>
+      </ul>
+      <button class="pc-btn pc-btn-outline">Начать бесплатно</button>
+    </div>
+    <div class="pc pc-featured reveal reveal-delay-1">
+      <div class="pc-badge">🔥 Самый популярный</div>
+      <div class="pc-plan">Стандарт</div>
+      <div class="pc-amt"><span class="pc-curr">$</span>19</div>
+      <div class="pc-period">в месяц · отмена в любой момент</div>
+      <p class="pc-desc">Полный доступ ко всем функциям и курсам.</p>
+      <ul class="pc-list">
+        <li><span class="check">✓</span>Все 120 уроков и 5 треков</li>
+        <li><span class="check">✓</span>Безлимитный AI-разговорный тренер</li>
+        <li><span class="check">✓</span>Безлимитная проверка грамматики</li>
+        <li><span class="check">✓</span>AI-тренер письма</li>
+        <li><span class="check">✓</span>Адаптивная программа обучения</li>
+        <li><span class="check">✓</span>Живые вебинары 2×/нед</li>
+        <li><span class="check">✓</span>Полный дашборд и статистика</li>
+        <li><span class="check">✓</span>Сертификат об окончании</li>
+      </ul>
+      <button class="pc-btn pc-btn-jade">Начать — 7 дней бесплатно</button>
+    </div>
+    <div class="pc reveal reveal-delay-2">
+      <div class="pc-plan">Премиум</div>
+      <div class="pc-amt"><span class="pc-curr">$</span>79</div>
+      <div class="pc-period">в месяц</div>
+      <p class="pc-desc">Личный наставник и максимальный результат.</p>
+      <ul class="pc-list">
+        <li><span class="check">✓</span>Всё из тарифа Стандарт</li>
+        <li><span class="check">✓</span>4 индивидуальных урока с учителем</li>
+        <li><span class="check">✓</span>Личный куратор-методист</li>
+        <li><span class="check">✓</span>Персональная программа обучения</li>
+        <li><span class="check">✓</span>Подготовка к IELTS / TOEFL</li>
+        <li><span class="check">✓</span>Приоритетная поддержка 24/7</li>
+        <li><span class="check">✓</span>Гарантия B2 за 6 месяцев</li>
+        <li><span class="check">✓</span>Международный сертификат</li>
+      </ul>
+      <button class="pc-btn pc-btn-outline">Выбрать Премиум</button>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section">
+  <div class="sec-eyebrow reveal">FAQ</div>
+  <h2 class="sec-h reveal">Частые вопросы</h2>
+  <div class="faq-wrap reveal">
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)"><h3>Подходит ли платформа если я вообще не знаю английский?</h3><span class="faq-arr">+</span></div><p class="faq-ans">Да, абсолютно. Курс Beginner A1 начинается с алфавита, все объяснения дублируются на русском языке. AI-тренер понимает русский и отвечает на нём, если ты ещё не готов к полному погружению. Сотни наших студентов начинали с нуля и дошли до B2.</p></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)"><h3>Как работает AI-тренер? Это ChatGPT?</h3><span class="faq-arr">+</span></div><p class="faq-ans">Нет, это специально настроенный AI на базе Claude от Anthropic — одной из ведущих AI-компаний мира. Тренер заточен именно под обучение английскому: он понимает контекст урока, твой уровень, исправляет ошибки мягко и объясняет правила на русском. Это не просто чат — это персональный репетитор.</p></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)"><h3>Сколько времени нужно тратить на учёбу?</h3><span class="faq-arr">+</span></div><p class="faq-ans">30–45 минут в день дают отличный прогресс. Уроки разбиты на блоки по 10–15 минут — можно учиться в транспорте, на перерыве или перед сном. Главное — регулярность. Наш трекер стриков помогает не пропускать дни.</p></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)"><h3>Можно ли отменить подписку?</h3><span class="faq-arr">+</span></div><p class="faq-ans">Да, в любой момент без объяснений и штрафов. Доступ сохраняется до конца оплаченного периода. Первые 7 дней совершенно бесплатны — кредитная карта нужна только после пробного периода.</p></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)"><h3>Есть ли живое общение с преподавателем?</h3><span class="faq-arr">+</span></div><p class="faq-ans">На тарифе Стандарт — групповые вебинары с преподавателем дважды в неделю. На тарифе Премиум — 4 индивидуальных урока в месяц плюс личный куратор в чате каждый день. AI не заменяет учителя — он дополняет и позволяет практиковаться между занятиями.</p></div>
+    <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)"><h3>Что за сертификат вы выдаёте?</h3><span class="faq-arr">+</span></div><p class="faq-ans">По окончании курса выдаётся именной сертификат FLUENT с QR-кодом верификации. Он не является заменой IELTS или TOEFL, но подтверждает факт прохождения программы и полученный уровень. Для подготовки к международным экзаменам у нас есть отдельный трек IELTS/TOEFL.</p></div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="cta-section">
+  <div class="sec-eyebrow reveal" style="justify-content:center;display:flex">Начни сегодня</div>
+  <h2 class="cta-h reveal">Говори <i>свободно</i><br/>через 90 дней</h2>
+  <p class="cta-sub reveal">7 дней бесплатно. Карта не нужна.<br/>62 000 студентов уже на пути к свободному English.</p>
+  <div class="hero-actions reveal" style="justify-content:center">
+    <a href="#hero-chat" class="btn btn-jade">Поговорить с AI прямо сейчас →</a>
+    <a href="#lessons" class="btn btn-ghost">Посмотреть программу</a>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="#" class="logo" style="font-size:26px">FLUENT<sup>AI</sup></a>
+      <p>Платформа для изучения английского с AI-наставником. Для тех, кто хочет говорить — а не просто учить правила.</p>
+    </div>
+    <div class="footer-col"><h4>Курсы</h4><ul><li><a href="#">Beginner A1</a></li><li><a href="#">Elementary A2</a></li><li><a href="#">Pre-Int B1</a></li><li><a href="#">Intermediate B2</a></li><li><a href="#">Business English</a></li><li><a href="#">IELTS/TOEFL</a></li></ul></div>
+    <div class="footer-col"><h4>AI-инструменты</h4><ul><li><a href="#">AI-разговор</a></li><li><a href="#">Проверка грамматики</a></li><li><a href="#">Тренер письма</a></li><li><a href="#">Словарные карточки</a></li><li><a href="#">Аудирование</a></li></ul></div>
+    <div class="footer-col"><h4>Компания</h4><ul><li><a href="#">О нас</a></li><li><a href="#">Преподаватели</a></li><li><a href="#">Блог</a></li><li><a href="#">Telegram</a></li><li><a href="#">Поддержка</a></li><li><a href="#">Условия</a></li></ul></div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2025 FLUENT AI. Все права защищены.</p>
+    <p>Powered by Claude AI · Anthropic</p>
+  </div>
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  ANTHROPIC API INTEGRATION
+// ═══════════════════════════════════════════════════════════════
+
+const API_URL = 'https://api.anthropic.com/v1/messages';
+const MODEL = 'claude-sonnet-4-6';
+
+async function callClaude(messages, systemPrompt, maxTokens = 600) {
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: maxTokens,
+      system: systemPrompt,
+      messages
+    })
+  });
+  if (!res.ok) throw new Error('API error ' + res.status);
+  const data = await res.json();
+  return data.content.map(b => b.text || '').join('');
+}
+
+// Streaming version for chat
+async function callClaudeStream(messages, systemPrompt, onChunk, onDone) {
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: 600,
+      stream: true,
+      system: systemPrompt,
+      messages
+    })
+  });
+  if (!res.ok) { onDone('Ошибка соединения с AI. Попробуй ещё раз.'); return; }
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buf = '', full = '';
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buf += decoder.decode(value, { stream: true });
+    const lines = buf.split('\n');
+    buf = lines.pop();
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+      const raw = line.slice(6).trim();
+      if (raw === '[DONE]') continue;
+      try {
+        const ev = JSON.parse(raw);
+        if (ev.type === 'content_block_delta' && ev.delta?.text) {
+          full += ev.delta.text;
+          onChunk(full);
+        }
+      } catch {}
+    }
+  }
+  onDone(full);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  HERO AI CHAT
+// ═══════════════════════════════════════════════════════════════
+
+const savedHistory = localStorage.getItem('fluent_chat_history');
+let chatHistory = savedHistory ? JSON.parse(savedHistory) : [];
+let chatMode = 'general';
+let isSending = false;
+
+const CHAT_SYSTEM = {
+  general: `Ты Aria — AI-тренер по английскому языку на платформе FLUENT. Ты дружелюбный, мотивирующий и тёплый. Говоришь по-русски если студент пишет по-русски, иначе по-английски. Если студент пишет по-английски — мягко исправляй ошибки в конце ответа (отдельный блок «✏️ Поправка:»), не прерывая разговор. Веди живой диалог, задавай вопросы, поощряй прогресс. Отвечай коротко — 2-4 предложения.`,
+  grammar: `Ты Aria — строгий, но добрый преподаватель грамматики английского. Если пользователь пишет что-то по-английски — сразу анализируй грамматику, объясняй ошибки на русском, показывай правило и правильный вариант. Если по-русски — помоги разобраться с грамматическим вопросом. Формат: сначала «✅ Правильный вариант», потом «📖 Правило». Кратко и ясно.`,
+  vocab: `Ты Aria — тренер словарного запаса. Если пользователь пишет слово по-английски — дай транскрипцию, перевод, 2 примера предложений, синонимы и уровень (A1-C2). Если по-русски — переведи на английский и дай ту же информацию. Отвечай структурированно с эмодзи-маркерами.`,
+  correct: `Ты Aria — языковой корректор. Пользователь пишет текст на английском чтобы ты его исправил. Анализируй КАЖДУЮ ошибку, нумеруй их, объясняй на русском почему это ошибка и как правильно. В конце дай исправленную версию целиком. Будь тщательным и педагогичным.`
+};
+
+function setMode(btn) {
+  document.querySelectorAll('.mode-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  chatMode = btn.dataset.mode;
+  const modeNames = {general:'Свободный разговор',grammar:'Грамматика',vocab:'Словарь',correct:'Исправление текста'};
+  addMsg('ai', `Режим переключён: **${modeNames[chatMode]}** ${chatMode==='general'?'💬':chatMode==='grammar'?'✏️':chatMode==='vocab'?'📚':'🔍'}\n\nЧто пишем?`);
+}
+
+function handleChatKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function addMsg(role, text, streaming = false) {
+  const wrap = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = `msg msg-${role}`;
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+  bubble.innerHTML = formatMsg(text);
+  const meta = document.createElement('div');
+  meta.className = 'msg-meta';
+  meta.textContent = role === 'ai' ? 'Aria · сейчас' : 'Ты · сейчас';
+  div.appendChild(bubble);
+  div.appendChild(meta);
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+  return bubble;
+}
+
+function renderStaticMsg(role, text) {
+  const wrap = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = `msg msg-${role}`;
+  
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+  bubble.innerHTML = formatMsg(text);
+  
+  const meta = document.createElement('div');
+  meta.className = 'msg-meta';
+  meta.textContent = role === 'ai' ? 'Aria · ранее' : 'Ты · ранее';
+  
+  div.appendChild(bubble);
+  div.appendChild(meta);
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function initChat() {
+  const wrap = document.getElementById('chat-messages');
+  
+  if (chatHistory.length > 0) {
+    wrap.innerHTML = '';
+    chatHistory.forEach(msg => {
+      const role = msg.role === 'user' ? 'user' : 'ai';
+      renderStaticMsg(role, msg.text);
+    });
+  }
+}
+
+function formatMsg(t) {
+  return t
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/\*(.+?)\*/g,'<em>$1</em>')
+    .replace(/`(.+?)`/g,'<code style="background:rgba(0,184,148,.15);color:var(--jade);padding:1px 5px;border-radius:4px;font-size:13px">$1</code>')
+    .replace(/\n/g,'<br/>');
+}
+
+function showTyping() {
+  const wrap = document.getElementById('chat-messages');
+  const div = document.createElement('div');
+  div.className = 'msg msg-ai';
+  div.id = 'typing-indicator';
+  div.innerHTML = '<div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function removeTyping() {
+  const el = document.getElementById('typing-indicator');
+  if (el) el.remove();
+}
+
+async function sendMessage() {
+  const input = document.getElementById("chat-input");
+  const userMessage = input.value.trim();
+  if (!userMessage || isSending) return;
+
+  isSending = true;
+  addMsg("user", userMessage);
+  chatHistory.push({ role: "user", text: userMessage });
+  localStorage.setItem('fluent_chat_history', JSON.stringify(chatHistory));
+
+  input.value = "";
+  input.style.height = "auto";
+  showTyping();
+
+  try {
+    const response = await fetch("http://localhost:3000/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message: userMessage,
+        history: chatHistory.slice(0, -1)
+      })
+    });
+
+    const data = await response.json();
+    removeTyping();
+
+    const reply = data.reply || "AI не вернул ответ";
+    addMsg("ai", reply);
+    
+    chatHistory.push({ role: "assistant", text: reply });
+    localStorage.setItem('fluent_chat_history', JSON.stringify(chatHistory));
+
+  } catch (err) {
+    console.error(err);
+    removeTyping();
+    addMsg("ai", "⚠️ Ошибка подключения к серверу");
+  } finally {
+    isSending = false;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  MINI AI DEMO (in bento)
+// ═══════════════════════════════════════════════════════════════
+let miniDemoRunning = false;
+async function runMiniDemo() {
+  if (miniDemoRunning) return;
+  miniDemoRunning = true;
+  const el = document.getElementById('mini-ans');
+  const btn = document.querySelector('.mai-btn');
+  btn.textContent = 'Анализирую...';
+  btn.disabled = true;
+  el.innerHTML = '<span class="spinner"></span>';
+  try {
+    const reply = await callClaude(
+      [{ role: 'user', content: 'I am go to school yesterday' }],
+      'Ты преподаватель английского. Проанализируй предложение, найди ВСЕ ошибки, объясни каждую на русском кратко, дай правильный вариант. Отвечай в 4-5 строк максимум. Используй: ❌ для ошибки, ✅ для правильного варианта.',
+      300
+    );
+    el.innerHTML = formatMsg(reply);
+    btn.textContent = 'Обновить разбор';
+    btn.disabled = false;
+    miniDemoRunning = false;
+  } catch {
+    el.textContent = 'Ошибка подключения. Попробуй ещё раз.';
+    btn.textContent = 'Попробовать ещё раз';
+    btn.disabled = false;
+    miniDemoRunning = false;
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  INTERACTIVE LESSON (with AI feedback)
+// ═══════════════════════════════════════════════════════════════
+const lessonQs = [
+  { q: 'Выбери правильную форму:\n"She ___ a doctor."', opts: ['am', 'is', 'are', 'be'], ans: 1, topic: 'verb to be with she/he/it' },
+  { q: 'Какое предложение правильное?', opts: ['I are happy.', 'We is at home.', 'They are students.', 'He are tired.'], ans: 2, topic: 'verb to be with they/we/you' },
+  { q: 'Переведи: "Мы не дома."', opts: ["We isn't at home.", "We aren't at home.", "We not are home.", "We don't are home."], ans: 1, topic: 'negative form of to be' },
+  { q: 'Как спросить: "Ты устал?"', opts: ['You are tired?', 'Are you tired?', 'Is you tired?', 'Do you tired?'], ans: 1, topic: 'question form of to be' },
+  { q: '"There ___ two cats in the garden."', opts: ['is', 'are', 'am', 'be'], ans: 1, topic: 'there is/are with plural nouns' }
+];
+let lq = 0, xp = 0, hp = 3, streak = 0;
+
+function renderLesson() {
+  const q = lessonQs[lq];
+  document.getElementById('ex-label').textContent = `Вопрос ${lq + 1} из ${lessonQs.length}`;
+  document.getElementById('ex-question').textContent = q.q;
+  document.getElementById('lprog').style.width = (lq / lessonQs.length * 100) + '%';
+  document.getElementById('feedback-body').innerHTML = '<span style="color:var(--muted);font-style:italic">Выбери ответ — и я объясню правило на русском языке 🎓</span>';
+  document.getElementById('feedback-body').className = 'feedback-body';
+  document.getElementById('feedback-actions').style.display = 'none';
+  const opts = document.getElementById('ex-options');
+  opts.innerHTML = '';
+  q.opts.forEach((o, i) => {
+    const b = document.createElement('button');
+    b.className = 'ex-opt'; b.textContent = o;
+    b.onclick = () => pickLessonOpt(i, b, q);
+    opts.appendChild(b);
+  });
+}
+
+async function pickLessonOpt(i, btn, q) {
+  document.querySelectorAll('.ex-opt').forEach(b => b.disabled = true);
+  const correct = i === q.ans;
+  btn.classList.add(correct ? 'correct' : 'wrong');
+  if (!correct) document.querySelectorAll('.ex-opt')[q.ans].classList.add('correct');
+
+  if (correct) { xp += 20; streak++; showToast(`+20 XP 🎉 Streak: ${streak}!`); }
+  else { hp = Math.max(0, hp - 1); streak = 0; }
+
+  document.getElementById('xp-count').textContent = xp;
+  document.getElementById('hp-count').textContent = hp;
+  document.getElementById('streak-count').textContent = streak;
+
+  const fb = document.getElementById('feedback-body');
+  fb.className = 'feedback-body loading';
+  fb.innerHTML = '<span class="spinner"></span> AI объясняет правило...';
+
+  try {
+    const userAnswer = q.opts[i];
+    const correctAnswer = q.opts[q.ans];
+    const explanation = await callClaude(
+      [{ role: 'user', content: `Урок: "${q.q}". Правильный ответ: "${correctAnswer}". Студент выбрал: "${userAnswer}". Тема: ${q.topic}. Объясни правило на русском языке (3-5 предложений). Если ответ правильный — похвали и объясни почему это правило работает. Если неправильный — объясни ошибку и правило. Используй простой язык. Добавь 1 похожий пример.` }],
+      'Ты преподаватель английского на онлайн-платформе. Объясняй грамматику кратко, понятно, по-русски. Будь тёплым и поддерживающим.',
+      400
+    );
+    fb.className = 'feedback-body';
+    fb.innerHTML = (correct ? '✅ ' : '❌ ') + formatMsg(explanation);
+  } catch {
+    fb.className = 'feedback-body';
+    fb.innerHTML = correct ? '✅ Правильно! Отличная работа!' : `❌ Неверно. Правильный ответ: <strong>${q.opts[q.ans]}</strong>`;
+  }
+  document.getElementById('feedback-actions').style.display = 'flex';
+}
+
+function nextLesson() {
+  lq++;
+  if (lq >= lessonQs.length) {
+    document.getElementById('ex-label').textContent = '🎉 Урок завершён!';
+    document.getElementById('ex-question').textContent = `Отлично! Ты заработал ${xp} XP и завершил урок Present Simple — to be.`;
+    document.getElementById('ex-options').innerHTML = `<button class="btn btn-jade" onclick="lq=0;xp=0;hp=3;streak=0;renderLesson()">Пройти ещё раз 🔄</button>`;
+    document.getElementById('feedback-body').innerHTML = '🏆 <strong>Урок пройден!</strong><br/><br/>Ты разобрал все формы глагола <em>to be</em>. Следующий шаг — Present Simple с другими глаголами!';
+    document.getElementById('feedback-actions').style.display = 'none';
+    document.getElementById('lprog').style.width = '100%';
+    showToast('🏆 Урок завершён! +' + xp + ' XP');
+    return;
+  }
+  renderLesson();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  GRAMMAR CHECKER
+// ═══════════════════════════════════════════════════════════════
+let gtRunning = false;
+async function checkGrammar() {
+  if (gtRunning) return;
+  const text = document.getElementById('gt-input').value.trim();
+  if (!text) { showToast('Введи текст для проверки!'); return; }
+  gtRunning = true;
+  const btn = document.getElementById('gt-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Проверяю...';
+  const res = document.getElementById('gt-result');
+  res.className = 'gt-result-body placeholder'; res.textContent = 'AI анализирует текст...';
+
+  try {
+    const reply = await callClaude(
+      [{ role: 'user', content: text }],
+      `Ты строгий и внимательный преподаватель английского. Проверь текст студента на ВСЕ грамматические ошибки.
+      
+      Формат ответа:
+      📊 ОЦЕНКА: X/10
+      
+      🔍 НАЙДЕННЫЕ ОШИБКИ:
+      Для каждой ошибки: [номер]. ❌ Неверно: "..." → ✅ Правильно: "..." | 📖 Правило: [краткое объяснение на русском]
+      
+      ✅ ИСПРАВЛЕННЫЙ ТЕКСТ:
+      [полный текст без ошибок]
+      
+      💡 СОВЕТ:
+      [одна рекомендация студенту]
+      
+      Если ошибок нет — скажи об этом и похвали студента.`,
+      800
+    );
+    res.className = 'gt-result-body';
+    res.innerHTML = formatMsg(reply);
+  } catch {
+    res.className = 'gt-result-body';
+    res.innerHTML = '⚠️ Ошибка подключения к AI. Проверь интернет и попробуй ещё раз.';
+  }
+  btn.disabled = false; btn.innerHTML = '✓ Проверить грамматику';
+  gtRunning = false;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  WRITING COACH
+// ═══════════════════════════════════════════════════════════════
+let wtPrompt = 'Describe your typical day in English (3-5 sentences)';
+let wtRunning = false;
+
+function setWritingPrompt(btn, prompt) {
+  document.querySelectorAll('.wt-prompt-chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  wtPrompt = prompt;
+  document.getElementById('wt-prompt-display').textContent = '📅 Тема: ' + prompt;
+  document.getElementById('wt-input').placeholder = 'Начни писать здесь по-английски...';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const wti = document.getElementById('wt-input');
+  if (wti) wti.addEventListener('input', () => {
+    const wc = wti.value.trim().split(/\s+/).filter(Boolean).length;
+    document.getElementById('wt-wc').textContent = wc + ' ' + (wc===1?'слово':wc<5?'слова':'слов');
+  });
+});
+
+async function checkWriting() {
+  if (wtRunning) return;
+  const text = document.getElementById('wt-input').value.trim();
+  if (!text) { showToast('Напиши что-нибудь!'); return; }
+  wtRunning = true;
+  const btn = document.getElementById('wt-btn');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>Анализирую...';
+  const res = document.getElementById('wt-result');
+  res.className = 'wt-result placeholder'; res.textContent = 'AI читает твой текст...';
+
+  try {
+    const reply = await callClaude(
+      [{ role: 'user', content: `Тема задания: "${wtPrompt}"\n\nТекст студента:\n${text}` }],
+      `Ты опытный преподаватель письма на английском. Студент написал текст на заданную тему.
+
+      Твой ответ должен содержать:
+      🎯 ОЦЕНКА: [A/B/C/D] и краткий общий комментарий (1-2 предложения)
+      
+      💪 ЧТО ХОРОШО: [2-3 конкретных похвалы]
+      
+      ✏️ ЧТО УЛУЧШИТЬ: [2-3 конкретных замечания с примерами]
+      
+      ✨ УЛУЧШЕННАЯ ВЕРСИЯ:
+      [переписанный текст студента, сохраняя его идеи но улучшая язык, грамматику и стиль]
+      
+      📚 НОВЫЕ СЛОВА: [3-5 слов из улучшенной версии которые стоит выучить]
+      
+      Будь конструктивным, конкретным и поддерживающим. Отвечай на русском (кроме английских примеров).`,
+      1000
+    );
+    res.className = 'wt-result';
+    res.innerHTML = formatMsg(reply);
+  } catch {
+    res.className = 'wt-result';
+    res.innerHTML = '⚠️ Ошибка подключения к AI. Попробуй ещё раз.';
+  }
+  btn.disabled = false; btn.innerHTML = '🚀 Отправить на проверку';
+  wtRunning = false;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  CURRICULUM TABS
+// ═══════════════════════════════════════════════════════════════
+function showCurr(id, btn) {
+  document.querySelectorAll('.curr-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.curr-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('curr-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  FAQ
+// ═══════════════════════════════════════════════════════════════
+function toggleFaq(el) { el.parentElement.classList.toggle('open'); }
+
+// ═══════════════════════════════════════════════════════════════
+//  TOAST
+// ═══════════════════════════════════════════════════════════════
+let toastTimer;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  REVEAL ON SCROLL
+// ═══════════════════════════════════════════════════════════════
+const revEls = document.querySelectorAll('.reveal');
+const revObs = new IntersectionObserver(entries => {
+  entries.forEach((e, i) => {
+    if (e.isIntersecting) {
+      setTimeout(() => e.target.classList.add('visible'), i * 60);
+      revObs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.08 });
+revEls.forEach(el => revObs.observe(el));
+
+// ═══════════════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════════════
+initChat();
+renderLesson();
+
+// Animate skill bars on scroll
+const skillFills = document.querySelectorAll('.skill-bar-fill');
+const sbObs = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.style.width = e.target.style.width; sbObs.unobserve(e.target); }
+  });
+}, { threshold: 0.3 });
+skillFills.forEach(el => sbObs.observe(el));
+</script>
+</body>
+</html>
