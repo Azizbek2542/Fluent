@@ -71,5 +71,5 @@ app.post("/chat", async (req, res) => {
 });
 
 app.listen(process.env.PORT, () => {
-    console.log(`✅ Gemini сервер с памятью: http://localhost:${process.env.PORT}`);
+    console.log(`✅ Gemini сервер: http://localhost:${process.env.PORT}`);
 });
