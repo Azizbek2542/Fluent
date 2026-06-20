@@ -1,4 +1,3 @@
-const ALLOWED_ORIGIN = "https://fluent-vpp8.onrender.com";
 require("dotenv").config();
 
 const express = require("express");
@@ -11,10 +10,6 @@ app.use(express.json());
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
 
 app.post("/chat", async (req, res) => {
-    const origin = req.headers.origin || req.headers.referer;
-    if (!origin || (!origin.includes("localhost") && !origin.includes("github.io") && !origin.includes("onrender"))) {
-    return res.status(403).json({ error: "Forbidden" });
-    }
     try {
         const { message, history } = req.body; // ← принимаем историю
         if (!message) return res.status(400).json({ error: "Пустое сообщение" });
