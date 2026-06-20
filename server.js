@@ -12,8 +12,8 @@ const GEMINI_KEY = process.env.GEMINI_API_KEY;
 
 app.post("/chat", async (req, res) => {
     const origin = req.headers.origin || req.headers.referer;
-    if (!origin || !origin.includes("onrender") && !origin.includes("localhost")) {
-        return res.status(403).json({ error: "Forbidden" });
+    if (!origin || (!origin.includes("localhost") && !origin.includes("github.io") && !origin.includes("onrender"))) {
+    return res.status(403).json({ error: "Forbidden" });
     }
     try {
         const { message, history } = req.body; // ← принимаем историю
