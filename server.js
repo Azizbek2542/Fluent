@@ -11,6 +11,7 @@ const GEMINI_KEY = process.env.GEMINI_API_KEY;
 
 app.post("/chat", async (req, res) => {
     try {
+        return res.status(429).json({ message: "Лимит исчерпан" }); 
         const { message, history } = req.body; // ← принимаем историю
         if (!message) return res.status(400).json({ error: "Пустое сообщение" });
 
